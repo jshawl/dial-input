@@ -19,7 +19,7 @@ const Dial = (selector) => {
   element.style.display = 'none'
   const svg = document.createElementNS("http://www.w3.org/2000/svg","svg")
   const dasharray = 320;
-  const dashoffset = dasharray * (element.value / (element.getAttribute("max")||100));
+  let dashoffset = dasharray * (element.value / (element.getAttribute("max")||100));
   let progress = dashoffset / dasharray
   const circle = createCircle({
     class: 'progress',
@@ -39,6 +39,12 @@ const Dial = (selector) => {
   knob.style.transform = `rotate(${360 * progress}deg)`
   svg.appendChild(knob)
   element.parentElement.insertBefore(svg, element)
+
+  const o = {
+    element,
+    svg,
+    progress
+  }
   svg.addEventListener('click', (e) => {
     const x = e.screenX - svg.getBoundingClientRect().left;
     const y = e.screenY - svg.getBoundingClientRect().top;
@@ -47,13 +53,12 @@ const Dial = (selector) => {
     const degrees = deg(x - cx, y - cy);
     const value = degrees / 3.6;
     element.value = value;
+    dashoffset = dasharray * (element.value / (element.getAttribute("max")||100));
+    o.progress = dashoffset / dasharray;
+    knob.style.transform = `rotate(${360 * o.progress}deg)`
   })
 
-  return {
-    element,
-    svg,
-    progress
-  }
+  return o
 }
 
 export default Dial
