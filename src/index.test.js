@@ -53,7 +53,7 @@ test('the knob follows the progress', () => {
 })
 
 test('clicking on the dial updates the range value and progress',  () => {
-  const event = new MouseEvent('click',{
+  const event = new MouseEvent('pointerup',{
     'view': window,
     'bubbles': true,
     'cancelable': true,
@@ -62,6 +62,37 @@ test('clicking on the dial updates the range value and progress',  () => {
   })
   const dial = Dial('[type="range"]')
   dial.svg.dispatchEvent(event)
+  expect(Number(dial.element.value)).toBeGreaterThan(75)
+  expect(dial.svg.querySelector(".knob").style.transform).toBe('rotate(315deg)')
+  expect(Number(dial.progress)).toBeGreaterThan(.75)
+})
+
+test('dragging the knob updates the range value and progress', () => {
+  const down = new MouseEvent('pointerdown',{
+    'view': window,
+    'bubbles': true,
+    'cancelable': true,
+    'clientX': 0,
+    'clientY': 0
+  })
+  const move = new MouseEvent('pointermove',{
+    'view': window,
+    'bubbles': true,
+    'cancelable': true,
+    'clientX': 215,
+    'clientY': 215
+  })
+  const up = new MouseEvent('pointerdown',{
+    'view': window,
+    'bubbles': true,
+    'cancelable': true,
+    'clientX': 215,
+    'clientY': 215
+  })
+  const dial = Dial('[type="range"]')
+  dial.svg.dispatchEvent(down)
+  dial.svg.dispatchEvent(move)
+  dial.svg.dispatchEvent(up)
   expect(Number(dial.element.value)).toBeGreaterThan(75)
   expect(dial.svg.querySelector(".knob").style.transform).toBe('rotate(315deg)')
   expect(Number(dial.progress)).toBeGreaterThan(.75)
