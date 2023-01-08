@@ -57,8 +57,8 @@ test('clicking on the dial updates the range value and progress',  () => {
     'view': window,
     'bubbles': true,
     'cancelable': true,
-    'screenX': 100,
-    'screenY': 100
+    'clientX': 215,
+    'clientY': 215
   })
   const dial = Dial('[type="range"]')
   dial.svg.dispatchEvent(event)
