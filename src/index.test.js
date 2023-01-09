@@ -88,7 +88,7 @@ test("dragging the knob updates the range value and progress", () => {
     clientX: 215,
     clientY: 215,
   });
-  const up = new MouseEvent("pointerdown", {
+  const up = new MouseEvent("pointerup", {
     view: window,
     bubbles: true,
     cancelable: true,
