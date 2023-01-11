@@ -68,7 +68,7 @@ test("clicking on the dial updates the range value and progress", () => {
   dial.svg.dispatchEvent(event);
   expect(Number(dial.element.value)).toBeGreaterThan(75);
   expect(dial.svg.querySelector(".knob").style.transform).toBe(
-    "rotate(315deg)"
+    "rotate(306deg)"
   );
   expect(Number(dial.progress)).toBeGreaterThan(0.75);
 });
@@ -85,15 +85,15 @@ test("dragging the knob updates the range value and progress", () => {
     view: window,
     bubbles: true,
     cancelable: true,
-    clientX: 215,
-    clientY: 215,
+    clientX: 100,
+    clientY: 300,
   });
   const up = new MouseEvent("pointerup", {
     view: window,
     bubbles: true,
     cancelable: true,
-    clientX: 215,
-    clientY: 215,
+    clientX: 100,
+    clientY: 300,
   });
   const dial = Dial('[type="range"]');
   dial.svg.dispatchEvent(down);
@@ -101,7 +101,7 @@ test("dragging the knob updates the range value and progress", () => {
   dial.svg.dispatchEvent(up);
   expect(Number(dial.element.value)).toBeGreaterThan(75);
   expect(dial.svg.querySelector(".knob").style.transform).toBe(
-    "rotate(315deg)"
+    "rotate(306deg)"
   );
   expect(Number(dial.progress)).toBeGreaterThan(0.75);
 });

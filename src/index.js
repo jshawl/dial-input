@@ -1,58 +1,58 @@
-const createCircle = props => {
-  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle")
-  for(let prop in props)
-    circle.setAttribute(prop, props[prop])
-  return circle
-}
-
-const deg = (x, y) => {
-  const rad = Math.atan2(y, x);
-  let degrees = rad * (180 / Math.PI) - 90;
-  if (degrees < 0) {
-    degrees += 360;
-  }
-  return degrees;
-};
+import { degreesFromCoordinates, limit, createSVGElement } from "./util.js";
 
 const Dial = (selector) => {
-  const element = document.querySelector(selector)
-  element.style.display = 'none'
-  const max = element.getAttribute("max") || 100
-  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg")
-  svg.setAttribute("height", "130")
-  svg.setAttribute("width", "130")
-  const dasharray = 320;
+  const element = document.querySelector(selector);
+  const max = element.getAttribute("max") || 100;
+  const svg = createSVGElement("svg");
   const cx = 65;
   const r = 50;
-  let dashoffset = dasharray * (element.value / max);
-  let progress = dashoffset / dasharray
   const state = {
     element,
     svg,
-    progress
-  }
-  const circle = createCircle({
-    class: 'progress',
+    progress: element.value / max,
+  };
+  const circleProps = {
     cx,
     cy: cx,
     fill: "none",
     r,
-    stroke: '#007AFF',
-    "stroke-dasharray": dasharray,
-    "stroke-dashoffset": dasharray - progress * dasharray,
+    "stroke-dasharray": 320,
     "stroke-width": 5,
-    style: `transform: rotate(90deg); transform-origin: ${cx}px ${cx}px;`
-  })
-  const available = createCircle({
-    cx,
-    cy: cx,
-    fill: "none",
-    r,
+    style: `transform: rotate(135deg); transform-origin: ${cx}px ${cx}px;`,
+  };
+  const onClick = (e) => {
+    const {left, top} = svg.getBoundingClientRect()
+    const degrees = degreesFromCoordinates(
+      e.clientX - left - progress.getAttribute("cx"),
+      e.clientY - top - progress.getAttribute("cy")
+    );
+    element.value = degrees / 3.6;
+    state.progress = element.value / max;
+    progress.setAttribute(
+      "stroke-dashoffset",
+      limit(320 - (state.progress - 0.15) * 320, 90, 330)
+    );
+    knob.style.transform = `rotate(${
+      360 * limit(state.progress, 0.15, 0.85)
+    }deg)`;
+  };
+  let dragging = false; 
+  element.style.display = "none";
+  svg.setAttribute("height", "130");
+  svg.setAttribute("width", "130");
+  const progress = createSVGElement("circle", {
+    ...circleProps,
+    class: "progress",
+    stroke: "#007AFF",
+    "stroke-dashoffset": limit(320 - (state.progress - 0.15) * 320, 90, 330),
+  });
+  const available = createSVGElement("circle", {
+    ...circleProps,
     stroke: "#ebebeb",
-    "stroke-width": 5
-  })
-  const knob = createCircle({
-    class: 'knob',
+    "stroke-dashoffset": 90,
+  });
+  const knob = createSVGElement("circle", {
+    class: "knob",
     cx,
     cy: cx + r,
     fill: "#ccc",
@@ -60,35 +60,29 @@ const Dial = (selector) => {
     r: 10,
     stroke: "#fff",
     "stroke-width": 3,
-    style: `transform: rotate(${360 * state.progress}deg); transform-origin: ${cx}px ${cx}px;`
-  })
-  svg.appendChild(available)
-  svg.appendChild(circle)
-  svg.appendChild(knob)
-  element.parentElement.insertBefore(svg, element)
-  let dragging
-  svg.addEventListener('pointerdown', (e) => {
-    dragging = true
-  })
-  const onClick = (e) => {
-    const x = e.clientX - svg.getBoundingClientRect().left;
-    const y = e.clientY - svg.getBoundingClientRect().top;
-    const degrees = deg(x - circle.getAttribute("cx"), y - circle.getAttribute("cy"));
-    element.value = degrees / 3.6;
-    dashoffset = dasharray * (element.value / max);
-    state.progress = dashoffset / dasharray;
-    circle.setAttribute("stroke-dashoffset", dasharray - state.progress * dasharray);
-    knob.style.transform = `rotate(${360 * state.progress}deg)`
-  }
-  svg.addEventListener('pointerup', (e) => {
-    dragging = false
-    onClick(e)
-  })
-  svg.addEventListener('pointermove', (e) => {
-    if(!dragging) return;
-    onClick(e)
-  })
-  return state
-}
+    style: `transform: rotate(${
+      360 * limit(state.progress, 0.15, 0.85)
+    }deg); transform-origin: ${cx}px ${cx}px;`,
+  });
+  svg.appendChild(available);
+  svg.appendChild(progress);
+  svg.appendChild(knob);
+  element.parentElement.insertBefore(svg, element);
+  svg.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    svg.classList.add("active");
+    onClick(e);
+  });
+  svg.addEventListener("pointerup", (e) => {
+    dragging = false;
+    svg.classList.remove("active");
+    onClick(e);
+  });
+  svg.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    onClick(e);
+  });
+  return state;
+};
 
-export default Dial
+export default Dial;
